@@ -9,8 +9,14 @@ export const authOptions = {
     }),
   ],
   callbacks: {
+    async jwt({ token, account }) {
+      if (account) {
+        token.accessToken = account.access_token; // Store OAuth token
+      }
+      return token;
+    },
     async session({ session, token }) {
-      session.user.id = token.sub; // Add GitHub user ID to session
+      session.accessToken = token.accessToken; // Pass OAuth token to frontend
       return session;
     },
   },
