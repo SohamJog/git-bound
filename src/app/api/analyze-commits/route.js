@@ -12,7 +12,6 @@ export async function POST(req) {
 
   try {
     const { commits, username } = await req.json();
-    console.log(commits)
 
     if (!commits || !username) {
       return NextResponse.json({ error: "Invalid request body" }, { status: 400 });

@@ -1,6 +1,8 @@
 "use client";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
+import MintButton from "./components/MintButton.js";
+
 
 export default function Home() {
   const { data: session } = useSession();
@@ -41,6 +43,7 @@ export default function Home() {
   
     const data = await res.json();
     console.log(data); // Logs analyzed skills
+    setAnalyzedSkills(data);
   };
 
   useEffect(() => {
@@ -48,9 +51,7 @@ export default function Home() {
       analyzeSkills();
     }
   }, [latestCommits]);
-  
-  
-  
+
 
   return (
     <div>
@@ -60,6 +61,9 @@ export default function Home() {
           <button onClick={fetchLatestCommits}>Fetch commits</button>
           <button onClick={() => signOut()}>Sign out</button>
           <button onClick={analyzeSkills}>Analyze skills</button>
+
+          {analyzedSkills && <MintButton userSkills={analyzedSkills} />}
+
 
         </>
       ) : (
