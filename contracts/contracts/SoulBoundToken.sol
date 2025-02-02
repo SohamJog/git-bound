@@ -10,20 +10,24 @@ contract SoulboundToken is ERC721URIStorage, Ownable {
     constructor() ERC721("SkillSBT", "SKILL") Ownable(msg.sender) {}
 
 
-    function mint(address recipient, string memory tokenURI) public onlyOwner returns (uint256) {
-        _tokenIds++;
+    function mint(address recipient, string memory tokenURI) public returns (uint256) {
+        _tokenIds++; 
         uint256 newItemId = _tokenIds;
+
         _safeMint(recipient, newItemId);
         _setTokenURI(newItemId, tokenURI);
+
         return newItemId;
     }
 
     // Override `_update` to prevent transfers
     function _update(address to, uint256 tokenId, address auth) internal override returns (address){
-        require(
-            to == address(0) || ownerOf(tokenId) == address(0), 
-            "SoulboundToken: Transfers are disabled"
-        );
+        if (tokenId < _tokenIds) { 
+            require(to == address(0), "SoulboundToken: Transfers are disabled.");
+        }
+        else {
+            require(tokenId == _tokenIds, "SoulboundToken: Token doesn't exist.");
+        }
         return super._update(to, tokenId, auth);
     }
 }

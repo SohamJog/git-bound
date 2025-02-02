@@ -1,9 +1,9 @@
 import { ethers } from "ethers";
 
-const CONTRACT_ADDRESS = "0x3d5241159f8Ca60Ff7BBA433C44f29d2094D462c";
+export const CONTRACT_ADDRESS = "0xC0f973971051BDB6892ffFDa7AD211B4DCB9C0a7";
 
-// ✅ ABI for the SoulboundToken Contract
-const ABI = [
+
+export const ABI = [
   {
     "inputs": [],
     "stateMutability": "nonpayable",
@@ -575,35 +575,37 @@ const ABI = [
 ];
 
 /**
- * Connects to MetaMask wallet
+ * Connect to MetaMask with better error handling
  */
 export async function connectWallet() {
-  if (!window.ethereum) {
-    alert("Please install MetaMask");
-    return;
-  }
+  try {
+    if (!window.ethereum) {
+      alert("No Ethereum provider found. Install MetaMask.");
+      throw new Error("No Ethereum provider found.");
+    }
 
-  const provider = new ethers.providers.Web3Provider(window.ethereum);
-  await provider.send("eth_requestAccounts", []);
-  return provider.getSigner();
+    const provider = new ethers.BrowserProvider(window.ethereum);
+    await window.ethereum.request({ method: "eth_requestAccounts" });
+
+    return provider.getSigner();
+  } catch (error) {
+    console.error("Wallet connection failed:", error);
+    alert("Failed to connect wallet. Ensure MetaMask is installed and unlocked.");
+    throw error;
+  }
 }
 
 /**
  * Mints an SBT with skill metadata
- * @param {Object} userSkillsJSON - The AI-analyzed skill metadata
  */
 export async function mintSBT(userSkillsJSON) {
   try {
     const signer = await connectWallet();
     const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
 
-    // Get user wallet address
     const userAddress = await signer.getAddress();
-
-    // Encode metadata as Base64 JSON
     const metadataURI = `data:application/json;base64,${btoa(JSON.stringify(userSkillsJSON))}`;
 
-    // Call mint function on the smart contract
     const tx = await contract.mint(userAddress, metadataURI);
     await tx.wait();
 
@@ -611,6 +613,7 @@ export async function mintSBT(userSkillsJSON) {
     return tx;
   } catch (error) {
     console.error("Minting Failed:", error);
+    alert("Transaction failed. Make sure you have enough gas fees.");
     throw error;
   }
 }

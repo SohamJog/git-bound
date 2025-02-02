@@ -1,28 +1,45 @@
-import { useState } from "react";
-import { mintSBT } from "../../lib/mintSBT";
+"use client";
 
-export default function MintButton({ userSkills }) {
+import { useState } from "react";
+import { ethers } from "ethers";
+import { CONTRACT_ADDRESS, ABI } from "@/lib/mintSBT";
+
+export default function MintSBTButton({ signer, userSkills }) {
   const [minting, setMinting] = useState(false);
   const [txHash, setTxHash] = useState(null);
 
-  const handleMint = async () => {
-    setMinting(true);
+  const mintSBT = async () => {
+    if (!signer) {
+      alert("Please connect your wallet first.");
+      return;
+    }
+
     try {
-      const tx = await mintSBT(userSkills);
+      setMinting(true);
+      const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
+
+      const userAddress = await signer.getAddress();
+      const metadataURI = `data:application/json;base64,${btoa(JSON.stringify(userSkills))}`;
+
+      const tx = await contract.mint(userAddress, metadataURI);
+      await tx.wait();
+
       setTxHash(tx.hash);
       alert("SBT Minted Successfully!");
     } catch (error) {
-      alert("Minting failed. Check console for details.");
+      console.error("Minting Failed:", error);
+      alert("Transaction failed. Make sure you have enough gas fees.");
+    } finally {
+      setMinting(false);
     }
-    setMinting(false);
   };
 
   return (
     <div className="flex flex-col items-center">
       <button 
-        onClick={handleMint} 
-        disabled={minting} 
-        className="px-4 py-2 bg-blue-600 text-white rounded"
+        onClick={mintSBT} 
+        className="px-4 py-2 bg-green-600 text-white rounded"
+        disabled={minting}
       >
         {minting ? "Minting..." : "Mint SBT"}
       </button>

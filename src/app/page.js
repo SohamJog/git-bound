@@ -2,12 +2,15 @@
 import { signIn, signOut, useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 import MintButton from "./components/MintButton.js";
+import ConnectWalletButton from "./components/ConnectWallet.js";
 
 
 export default function Home() {
   const { data: session } = useSession();
   const [latestCommits, setLatestCommits] = useState([]);
   const [analyzedSkills, setAnalyzedSkills] = useState([]);
+  const [signer, setSigner] = useState(null);
+
 
 
   const fetchLatestCommits = async () => {
@@ -57,12 +60,13 @@ export default function Home() {
     <div>
       {session ? (
         <>
+        <ConnectWalletButton onWalletConnected={setSigner} />
           <p>Signed in as {session.user?.name}</p>
           <button onClick={fetchLatestCommits}>Fetch commits</button>
           <button onClick={() => signOut()}>Sign out</button>
           <button onClick={analyzeSkills}>Analyze skills</button>
 
-          {analyzedSkills && <MintButton userSkills={analyzedSkills} />}
+          {analyzedSkills && <MintButton signer={signer} userSkills={analyzedSkills} />}
 
 
         </>
