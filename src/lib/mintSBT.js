@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
 
-export const CONTRACT_ADDRESS = "0xC0f973971051BDB6892ffFDa7AD211B4DCB9C0a7";
+export const CONTRACT_ADDRESS = "0x2f670C6b1FD1Cb373cd1f13F23b5505f315ff4B4";
 
 
 export const ABI = [
