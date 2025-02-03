@@ -22,12 +22,9 @@ contract SoulboundToken is ERC721URIStorage, Ownable {
 
     // Override `_update` to prevent transfers
     function _update(address to, uint256 tokenId, address auth) internal override returns (address){
-        if (tokenId < _tokenIds) { 
-            require(to == address(0), "SoulboundToken: Transfers are disabled.");
-        }
-        else {
-            require(tokenId == _tokenIds, "SoulboundToken: Token doesn't exist.");
-        }
+
+        require(_ownerOf(tokenId) == address(0), "SoulboundToken: Transfers are disabled.");
+      
         return super._update(to, tokenId, auth);
     }
 }
