@@ -1,7 +1,7 @@
 import { ethers } from "ethers";
 
 export const CONTRACT_ADDRESS = "0x2f670C6b1FD1Cb373cd1f13F23b5505f315ff4B4";
-
+export const ARBITRUM_CONTRACT = "0xa6e41ffd769491a42a6e5ce453259b93983a22ef";
 
 export const ABI = [
   {
