@@ -1,0 +1,3 @@
+[submodule "stylus_contracts/nitro-devnode"]
+	path = stylus_contracts/nitro-devnode
+	url = https://github.com/SohamJog/git-bound.git
