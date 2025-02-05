@@ -40,15 +40,15 @@ fn main() {
         let reward = if player_move.beats(&ai_move) {
             println!("🏆 You win!");
             player_wins += 1;
-            1.0 // Positive reward if player wins
+            1 // Positive reward if player wins
         } else if ai_move.beats(&player_move) {
             println!("🤖 AI wins!");
             ai_wins += 1;
-            -1.0 // Negative reward if AI wins
+            -1 // Negative reward if AI wins
         } else {
             println!("⚖️ It's a draw!");
             draws += 1;
-            0.0 // No reward for a draw
+            0 // No reward for a draw
         };
 
         ai.update_q_value(player_move, reward);
