@@ -42,5 +42,4 @@ next-env.d.ts
 
 /connect4
 /rps/target
-
-
+stylus_contracts/rps/target
