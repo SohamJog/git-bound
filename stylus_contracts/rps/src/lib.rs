@@ -180,14 +180,6 @@ impl Contract {
             .unwrap()
             .set(I32::try_from(q_values[action_idx] + (alpha * delta) / 100).unwrap());
 
-        // Shift history & update
-        // for i in 0..(HISTORY_SIZE - 1) {
-        //     if let Some(next_value) = self.history.getter(i + 1) {
-        //         let mut current = self.history.setter(i);
-
-        //         current.unwrap().set(**next_value);
-        //     }
-        // }
         for i in 0..(HISTORY_SIZE - 1) {
             let next_value = self
                 .history
@@ -205,6 +197,39 @@ impl Contract {
             .setter(HISTORY_SIZE - 1)
             .unwrap()
             .set(I32::unchecked_from(player_move)); // Convert `U32` to `I32`
+    }
+
+    /// Play a game of Rock Paper Scissors against the NFT.
+    pub fn play(&mut self, player_move: U32) -> (U32, I32) {
+        let ai_move = self.choose_move();
+        let ai_move_enum = Move::from_index(ai_move.to());
+
+        let player_move_enum = Move::from_index(player_move.to());
+
+        let reward = if ai_move_enum.beats(&player_move_enum) {
+          I32::try_from(1).unwrap() // AI wins
+        } else if player_move_enum.beats(&ai_move_enum) {
+          I32::try_from(-1).unwrap()// Player wins
+        } else {
+          I32::try_from(0).unwrap() // Draw
+        };
+
+        self.update_q_value(player_move, reward);
+
+        (ai_move, reward) // Return AI move and result
+    }
+
+    /// Get the last 5 moves (history) for the UI.
+    pub fn get_history(&self) -> [I32; HISTORY_SIZE] {
+        let mut history_arr = [ I32::try_from(0).unwrap(); HISTORY_SIZE];
+
+        for i in 0..HISTORY_SIZE {
+            if let Some(value) = self.history.getter(i) {
+                history_arr[i] = value.get();
+            }
+        }
+
+        history_arr
     }
 }
 
