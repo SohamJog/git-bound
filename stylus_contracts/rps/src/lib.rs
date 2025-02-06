@@ -1,11 +1,11 @@
+// Allow `cargo stylus export-abi` to generate a main function.
+// TODO: Un-comment
+#![cfg_attr(not(any(test, feature = "export-abi")), no_main)]
+extern crate alloc;
+
 pub mod learning;
 // pub use learning::game::RPSAI;
 pub use learning::game::Move;
-
-// Allow `cargo stylus export-abi` to generate a main function.
-// TODO: Un-comment
-//#![cfg_attr(not(any(test, feature = "export-abi")), no_main)]
-extern crate alloc;
 
 /// Import items from the SDK. The prelude contains common traits and macros.
 use stylus_sdk::{
@@ -207,11 +207,11 @@ impl Contract {
         let player_move_enum = Move::from_index(player_move.to());
 
         let reward = if ai_move_enum.beats(&player_move_enum) {
-          I32::try_from(1).unwrap() // AI wins
+            I32::try_from(1).unwrap() // AI wins
         } else if player_move_enum.beats(&ai_move_enum) {
-          I32::try_from(-1).unwrap()// Player wins
+            I32::try_from(-1).unwrap() // Player wins
         } else {
-          I32::try_from(0).unwrap() // Draw
+            I32::try_from(0).unwrap() // Draw
         };
 
         self.update_q_value(player_move, reward);
@@ -221,7 +221,7 @@ impl Contract {
 
     /// Get the last 5 moves (history) for the UI.
     pub fn get_history(&self) -> [I32; HISTORY_SIZE] {
-        let mut history_arr = [ I32::try_from(0).unwrap(); HISTORY_SIZE];
+        let mut history_arr = [I32::try_from(0).unwrap(); HISTORY_SIZE];
 
         for i in 0..HISTORY_SIZE {
             if let Some(value) = self.history.getter(i) {
@@ -257,3 +257,14 @@ impl Contract {
         state
     }
 }
+
+/*
+
+project metadata hash computed on deployment: "d91e49926b2ecb1242158fd598fdf3b73a345456b1a6cff30a40dff1eb4687ac"
+stripped custom section from user wasm to remove any sensitive data
+contract size: 14.2 KB
+wasm data fee: 0.000098 ETH (originally 0.000081 ETH with 20% bump)
+deployed code at address: 0xfbfe72c3001804c7e3d36c4604904339074f5a60
+deployment tx hash: 0x31ada7a89847094f8ffa7cea6356e1297fc95a628ff38fb64d550b151dbabbe9
+contract activated and ready onchain with tx hash: 0x9d40afc3adf9c60945d3c917f6237317ba9e26d8cc42179b1f1b6a5b05373114
+*/
