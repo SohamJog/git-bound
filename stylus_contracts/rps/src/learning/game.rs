@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::io;
+// use crate::Contract;
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub enum Move {
@@ -7,7 +8,9 @@ pub enum Move {
     Paper,
     Scissors,
 }
+// impl Contract {
 
+// }
 impl Move {
     pub fn from_index(idx: u32) -> Self {
         match idx {
