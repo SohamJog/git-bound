@@ -1,14 +1,11 @@
 import { Button } from "./ui/Button";
+import ConnectWalletButton from "./ConnectWallet.js";
 
-export const NavBar = () => {
+export const NavBar = ({ setSigner }) => {
   return (
     <nav className="flex justify-between items-center p-4 bg-bgDark text-white">
-      <h1 className="text-2xl font-pixel">🎮 OnChainAI</h1>
       <div className="flex gap-4">
-        <Button className="bg-secondary">Mint</Button>
-        <Button className="bg-secondary">Compete</Button>
-        <Button className="bg-secondary">FAQ</Button>
-        <Button className="bg-primary">Connect Wallet</Button>
+        <ConnectWalletButton onWalletConnected={setSigner} />
       </div>
     </nav>
   );

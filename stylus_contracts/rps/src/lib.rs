@@ -225,6 +225,14 @@ impl Contract {
 
         history_arr
     }
+
+    // https://api.dicebear.com/9.x/croodles/svg?seed=<public address>
+    #[selector(name = "tokenURI")]
+    pub fn token_uri(&self, token_id: U256) -> String {
+        let mut uri = String::new();
+        write!(uri, "https://api.dicebear.com/9.x/croodles/svg?seed={}", self.owner.get()).unwrap();
+        uri
+    }
 }
 
 // private functions

@@ -2,14 +2,35 @@
 import { NavBar } from "./components/Navbar";
 import { Button } from "./components/ui/Button";
 import { Card } from "./components/ui/Card";
+import { createAvatar } from "@dicebear/core";
+import { croodles } from "@dicebear/collection";
+import { useState } from "react";
+import RPSGame from "./components/RPSGame";
 
 export default function Home() {
+  const avatar = createAvatar(croodles, {
+    seed: "John Doe",
+  });
+  const avatar_2 = createAvatar(croodles, {
+    seed: "Soham",
+  });
+
+  const svg = avatar.toDataUri();
+  const svg_2 = avatar_2.toDataUri();
+
+  const [signer, setSigner] = useState(null);
+  const [showGame, setShowGame] = useState(false);
+
   return (
     <div className="min-h-screen bg-bgDark text-white flex flex-col items-center">
-      <NavBar />
+      <NavBar setSigner={setSigner} />
       <div className="text-center mt-10">
-        <h1 className="text-4xl font-pixel text-primary">Welcome to Proof-of-Defeat</h1>
-        <p className="text-lg text-gray-300 mt-3">Train your NFT and battle against others!</p>
+        <h1 className="text-4xl font-pixel text-primary">
+          Welcome to Proof-of-Defeat
+        </h1>
+        <p className="text-lg text-gray-300 mt-3">
+          Train your NFT and battle against others!
+        </p>
       </div>
 
       {/* Buttons */}
@@ -21,9 +42,21 @@ export default function Home() {
 
       {/* NFT Preview */}
       <div className="mt-16 flex gap-6">
-        <Card title="Your AI NFT" imageUrl="/nft-placeholder.png" description="Train me to fight!" />
-        <Card title="Opponent AI" imageUrl="/nft-opponent.png" description="Defeat me in battle!" />
+        <div onClick={() => setShowGame(true)}>
+          <Card
+            title="Your AI NFT"
+            imageUrl={svg}
+            description="Train me to fight!"
+          />
+        </div>
+        <Card
+          title="Opponent AI"
+          imageUrl={svg_2}
+          description="Compete against other NFTs!"
+        />
       </div>
+
+      {showGame && <RPSGame onClose={() => setShowGame(false)} />}
     </div>
   );
 }
