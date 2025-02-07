@@ -66,7 +66,7 @@ const RPSGame = ({ onClose }) => {
         </div>
 
         {playerMove && aiMove && (
-          <div className="mb-6">
+          <div className="mb-6 text-black">
             <p className="text-lg">
               You:{" "}
               <span className="font-bold text-yellow-700">

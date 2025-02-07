@@ -6,6 +6,7 @@ import { createAvatar } from "@dicebear/core";
 import { croodles } from "@dicebear/collection";
 import { useState } from "react";
 import RPSGame from "./components/RPSGame";
+import FAQ from "./components/FAQ";
 
 export default function Home() {
   const avatar = createAvatar(croodles, {
@@ -35,7 +36,8 @@ export default function Home() {
 
       {/* Buttons */}
       <div className="mt-10 flex gap-6">
-        <Button className="bg-primary">Mint</Button>
+        {signer && <Button className="bg-primary">Mint</Button>}
+
         <Button className="bg-primary">Compete</Button>
         <Button className="bg-primary">FAQ</Button>
       </div>
@@ -57,6 +59,10 @@ export default function Home() {
       </div>
 
       {showGame && <RPSGame onClose={() => setShowGame(false)} />}
+      <div className="min-h-screen bg-bgDark text-white flex flex-col items-center">
+        {/* Other sections */}
+        <FAQ />
+      </div>
     </div>
   );
 }

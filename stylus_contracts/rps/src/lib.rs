@@ -117,14 +117,14 @@ impl Contract {
         Ok(owner)
     }
 
-    pub fn choose_move(&mut self) -> U32 {
+    pub fn choose_move(&self) -> U32 {
         let state_key = Self::encode_state(&self.history) as u32;
         let (rand_val, new_seed) = Self::pseudo_random(self.rng_seed.get().to::<u32>());
-        self.rng_seed.set(U32::from(new_seed));
+        //self.rng_seed.set(U32::from(new_seed));
 
         if rand_val < self.epsilon.get().to::<u32>() {
             let (random_idx, new_seed) = Self::pseudo_random(self.rng_seed.get().to::<u32>());
-            self.rng_seed.set(U32::from(new_seed));
+            // self.rng_seed.set(U32::from(new_seed));
             return U32::from(random_idx % 3); // Random move (0,1,2)
         }
 
@@ -230,7 +230,12 @@ impl Contract {
     #[selector(name = "tokenURI")]
     pub fn token_uri(&self, token_id: U256) -> String {
         let mut uri = String::new();
-        write!(uri, "https://api.dicebear.com/9.x/croodles/svg?seed={}", self.owner.get()).unwrap();
+        write!(
+            uri,
+            "https://api.dicebear.com/9.x/croodles/svg?seed={}",
+            self.owner.get()
+        )
+        .unwrap();
         uri
     }
 }
@@ -271,8 +276,6 @@ deployment tx hash: 0x31ada7a89847094f8ffa7cea6356e1297fc95a628ff38fb64d550b151d
 contract activated and ready onchain with tx hash: 0x9d40afc3adf9c60945d3c917f6237317ba9e26d8cc42179b1f1b6a5b05373114
 */
 
-
-
 /*
 DEVNET CONTRACT:
 stripped custom section from user wasm to remove any sensitive data
@@ -293,3 +296,7 @@ deployed code at address: 0xa6e41ffd769491a42a6e5ce453259b93983a22ef
 deployment tx hash: 0x07d4ffe31a8ffeacc92cc2dfc9110531aa6ca793c1c9e8f1f55b73a5855225e7
 contract activated and ready onchain with tx hash: 0x15c7f12af867410020d42d799e196a7be8eb4b2d34d84398e8e3bfd71e934fbe
 */
+
+
+
+// 0xa6e41ffd769491a42a6e5ce453259b93983a22ef

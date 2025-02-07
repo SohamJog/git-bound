@@ -21,11 +21,13 @@ interface IContract  {
 
     function ownerOf(uint256 token_id) external view returns (address);
 
-    function chooseMove() external returns (uint32);
+    function chooseMove() external view returns (uint32);
 
     function updateQValue(uint32 player_move, int32 reward) external;
 
     function play(uint32 player_move) external returns (uint32, int32);
 
     function getHistory() external view returns (int32[5] memory);
+
+    function tokenURI(uint256 token_id) external view returns (string memory);
 }
