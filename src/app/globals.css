@@ -23,3 +23,6 @@ body {
 .rps-button {
   @apply w-24 h-24 bg-yellow-500 text-white rounded-full shadow-md transition-all hover:scale-110 hover:bg-yellow-600;
 }
+html {
+  scroll-behavior: smooth;
+}

@@ -1,6 +1,6 @@
 export default function FAQSection() {
   return (
-    <div className="bg-bgDark text-white p-10">
+    <div id="faq" className="bg-bgDark text-white p-10">
       <h2 className="font-bold text-3xl">
         The Problem: AI Doesn't Exist Fully On-Chain
       </h2>

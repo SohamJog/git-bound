@@ -39,7 +39,9 @@ export default function Home() {
         {signer && <Button className="bg-primary">Mint</Button>}
 
         <Button className="bg-primary">Compete</Button>
-        <Button className="bg-primary">FAQ</Button>
+        <a href="#faq">
+          <Button className="bg-primary">FAQ</Button>
+        </a>
       </div>
 
       {/* NFT Preview */}
