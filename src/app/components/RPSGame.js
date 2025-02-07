@@ -47,7 +47,7 @@ const RPSGame = ({ onClose }) => {
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.8, opacity: 0 }}
-        className="bg-yellow-200 p-8 rounded-3xl shadow-xl text-center w-[450px] border-8 border-yellow-400"
+        className="bg-yellow-200 p-8 rounded-3xl shadow-xl text-center w-[450px] border-8 border-pink-200"
       >
         <h2 className="text-3xl font-bold mb-4 text-yellow-800">
           Rock, Paper, Scissors

@@ -6,6 +6,7 @@ import { createAvatar } from "@dicebear/core";
 import { croodles } from "@dicebear/collection";
 import { useState } from "react";
 import RPSGame from "./components/RPSGame";
+import CompeteBox from "./components/CompeteBox";
 import FAQ from "./components/FAQ";
 
 export default function Home() {
@@ -13,7 +14,7 @@ export default function Home() {
     seed: "John Doe",
   });
   const avatar_2 = createAvatar(croodles, {
-    seed: "Soham",
+    seed: "Soham_|-|-",
   });
 
   const svg = avatar.toDataUri();
@@ -21,6 +22,7 @@ export default function Home() {
 
   const [signer, setSigner] = useState(null);
   const [showGame, setShowGame] = useState(false);
+  const [showCompete, setShowCompete] = useState(false);
 
   return (
     <div className="min-h-screen bg-bgDark text-white flex flex-col items-center">
@@ -47,20 +49,23 @@ export default function Home() {
       {/* NFT Preview */}
       <div className="mt-16 flex gap-6">
         <div onClick={() => setShowGame(true)}>
+          <Card title="TRAIN" imageUrl={svg} description="Train me to fight!" />
+        </div>
+        <div
+          onClick={() => {
+            setShowCompete(true);
+          }}
+        >
           <Card
-            title="Your AI NFT"
-            imageUrl={svg}
-            description="Train me to fight!"
+            title="COMPETE"
+            imageUrl={svg_2}
+            description="Compete against other NFTs!"
           />
         </div>
-        <Card
-          title="Opponent AI"
-          imageUrl={svg_2}
-          description="Compete against other NFTs!"
-        />
       </div>
 
       {showGame && <RPSGame onClose={() => setShowGame(false)} />}
+      {showCompete && <CompeteBox onClose={() => setShowCompete(false)} />}
       <div className="min-h-screen bg-bgDark text-white flex flex-col items-center">
         {/* Other sections */}
         <FAQ />
