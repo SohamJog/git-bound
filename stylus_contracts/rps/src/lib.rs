@@ -128,12 +128,6 @@ impl Contract {
             return U32::from(random_idx % 3); // Random move (0,1,2)
         }
 
-        // // Fetch or initialize Q-values
-        // let mut q_values = self
-        //     .q_table
-        //     .get(state_key).1;
-        //     //.or_insert([StorageI32::from(0); 3]);
-
         let stored_q_values = self.q_table.get(state_key); // StorageGuard<StorageArray<StorageI32, 3>>
 
         // Correct way to access StorageArray elements
@@ -267,4 +261,27 @@ wasm data fee: 0.000098 ETH (originally 0.000081 ETH with 20% bump)
 deployed code at address: 0xfbfe72c3001804c7e3d36c4604904339074f5a60
 deployment tx hash: 0x31ada7a89847094f8ffa7cea6356e1297fc95a628ff38fb64d550b151dbabbe9
 contract activated and ready onchain with tx hash: 0x9d40afc3adf9c60945d3c917f6237317ba9e26d8cc42179b1f1b6a5b05373114
+*/
+
+
+
+/*
+DEVNET CONTRACT:
+stripped custom section from user wasm to remove any sensitive data
+contract size: 14.2 KB
+wasm size: 41.4 KB
+File used for deployment hash: ./Cargo.lock
+File used for deployment hash: ./Cargo.toml
+File used for deployment hash: ./rust-toolchain.toml
+File used for deployment hash: ./src/learning/game.rs
+File used for deployment hash: ./src/learning/mod.rs
+File used for deployment hash: ./src/lib.rs
+File used for deployment hash: ./src/main.rs
+project metadata hash computed on deployment: "2a92f8be8dd994d1dc2a00daf8291d2a99e9014c1e5b3a16f39620d1fd9862b5"
+stripped custom section from user wasm to remove any sensitive data
+contract size: 14.2 KB
+wasm data fee: 0.000098 ETH (originally 0.000081 ETH with 20% bump)
+deployed code at address: 0xa6e41ffd769491a42a6e5ce453259b93983a22ef
+deployment tx hash: 0x07d4ffe31a8ffeacc92cc2dfc9110531aa6ca793c1c9e8f1f55b73a5855225e7
+contract activated and ready onchain with tx hash: 0x15c7f12af867410020d42d799e196a7be8eb4b2d34d84398e8e3bfd71e934fbe
 */

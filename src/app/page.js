@@ -1,78 +1,29 @@
 "use client";
-import { signIn, signOut, useSession } from "next-auth/react";
-import { useState, useEffect } from "react";
-import MintButton from "./components/MintButton.js";
-import ConnectWalletButton from "./components/ConnectWallet.js";
-
+import { NavBar } from "./components/Navbar";
+import { Button } from "./components/ui/Button";
+import { Card } from "./components/ui/Card";
 
 export default function Home() {
-  const { data: session } = useSession();
-  const [latestCommits, setLatestCommits] = useState([]);
-  const [analyzedSkills, setAnalyzedSkills] = useState([]);
-  const [signer, setSigner] = useState(null);
-
-
-
-  const fetchLatestCommits = async () => {
-    console.log("fetching latest commits...")
-    if (!session?.accessToken) return;
-  
-    const res = await fetch("/api/github-data", {
-      method: "POST",
-      body: JSON.stringify({
-        accessToken: session.accessToken
-      }),
-      headers: { "Content-Type": "application/json" },
-    });
-  
-    const data = await res.json();
-    console.log("commits: "+data); // Display latest commits across all repos
-    setLatestCommits(data);
-  };
-
-  const analyzeSkills = async () => {
-    console.log("analyzing skills...")
-    console.log(latestCommits)
-    console.log(session.user.name)
-
-    const res = await fetch("/api/analyze-commits", {
-      method: "POST",
-      body: JSON.stringify({
-        username: session.user.name,
-        commits: latestCommits, // Array of commits from GitHub API
-      }),
-      headers: { "Content-Type": "application/json" },
-    });
-  
-    const data = await res.json();
-    console.log(data); // Logs analyzed skills
-    setAnalyzedSkills(data);
-  };
-
-  useEffect(() => {
-    if (latestCommits.length) {
-      analyzeSkills();
-    }
-  }, [latestCommits]);
-
-
   return (
-    <div>
-      {session ? (
-        <>
-        <ConnectWalletButton onWalletConnected={setSigner} />
-          <p>Signed in as {session.user?.name}</p>
-          <button onClick={fetchLatestCommits}>Fetch commits</button>
-          <button onClick={() => signOut()}>Sign out</button>
-          <button onClick={analyzeSkills}>Analyze skills</button>
+    <div className="min-h-screen bg-bgDark text-white flex flex-col items-center">
+      <NavBar />
+      <div className="text-center mt-10">
+        <h1 className="text-4xl font-pixel text-primary">Welcome to Proof-of-Defeat</h1>
+        <p className="text-lg text-gray-300 mt-3">Train your NFT and battle against others!</p>
+      </div>
 
-          {analyzedSkills && <MintButton signer={signer} userSkills={analyzedSkills} />}
+      {/* Buttons */}
+      <div className="mt-10 flex gap-6">
+        <Button className="bg-primary">Mint</Button>
+        <Button className="bg-primary">Compete</Button>
+        <Button className="bg-primary">FAQ</Button>
+      </div>
 
-
-        </>
-      ) : (
-        <button onClick={() => signIn("github")}>Sign in with GitHub</button>
-      )}
+      {/* NFT Preview */}
+      <div className="mt-16 flex gap-6">
+        <Card title="Your AI NFT" imageUrl="/nft-placeholder.png" description="Train me to fight!" />
+        <Card title="Opponent AI" imageUrl="/nft-opponent.png" description="Defeat me in battle!" />
+      </div>
     </div>
   );
 }
