@@ -162,6 +162,82 @@ export default function FAQSection() {
         </li>
       </ul>
 
+      <h2 className="text-2xl font-bold mt-8 mb-4">
+        Best-of-5 Format & Adaptive Learning
+      </h2>
+
+      <p className="mb-4">
+        Unlike a <span className="font-bold">single-round RPS</span>, which
+        relies on <span className="font-bold">random chance</span>, a{" "}
+        <span className="font-bold">Best-of-5 format</span> allows:
+      </p>
+
+      <ul className="list-disc pl-6 mb-4">
+        <li>
+          <span className="font-bold">Pattern Learning:</span> The AI{" "}
+          <span className="font-bold">adjusts its strategy dynamically</span>{" "}
+          based on previous rounds.
+        </li>
+        <li>
+          <span className="font-bold">Win Probability Optimization:</span> If a
+          player favors <span className="font-bold">Rock</span>, the AI{" "}
+          <span className="font-bold">shifts towards Paper more often</span>.
+        </li>
+        <li>
+          <span className="font-bold">Adaptive Reinforcement:</span> The{" "}
+          <span className="font-bold">AI continuously updates</span> its
+          strategy,
+          <span className="font-bold">
+            {" "}
+            becoming stronger over multiple sessions
+          </span>
+          .
+        </li>
+      </ul>
+
+      <p className="mb-4">
+        Every <span className="font-bold">PoD NFT</span> evolves into a{" "}
+        <span className="font-bold">personalized AI opponent</span>, uniquely
+        tailored to <span className="font-bold">counter your playstyle</span>.
+        The more you play, the better it learns{" "}
+        <span className="font-bold">how to beat you</span>.
+      </p>
+
+      <h2 className="text-2xl font-bold mt-8 mb-4">
+        Competing Against Other Players
+      </h2>
+
+      <p className="mb-4">
+        Once trained, your <span className="font-bold">PoD NFT</span> can{" "}
+        <span className="font-bold">battle against other players' NFTs</span> in
+        a <span className="font-bold">Best-of-5 duel</span> where:
+      </p>
+
+      <ul className="list-disc pl-6 mb-4">
+        <li>
+          <span className="font-bold">Two trained NFTs face off</span> using
+          their learned strategies.
+        </li>
+        <li>
+          The{" "}
+          <span className="font-bold">
+            winner is determined across multiple rounds
+          </span>{" "}
+          to reduce randomness.
+        </li>
+        <li>
+          <span className="font-bold">Prizes & Leaderboards</span> reward the{" "}
+          <span className="font-bold">most adaptive AI strategies</span>.
+        </li>
+      </ul>
+
+      <p className="mb-4">
+        This extends beyond{" "}
+        <span className="font-bold">Rock-Paper-Scissors</span>—it’s a{" "}
+        <span className="font-bold">framework for evolving AI NFTs</span> that
+        adapt and evolve <span className="font-bold">completely on-chain.</span>
+      </p>
+
       <h2 className="text-3xl font-bold mb-6">
         For Developers: Extend Proof of Defeat with Your Own Games
       </h2>

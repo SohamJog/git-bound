@@ -16,13 +16,18 @@ export default function Home() {
   const avatar_2 = createAvatar(croodles, {
     seed: "Soham_|-|-",
   });
+  const avatar_3 = createAvatar(croodles, {
+    seed: "S)n!o",
+  });
 
   const svg = avatar.toDataUri();
   const svg_2 = avatar_2.toDataUri();
+  const svg_3 = avatar_3.toDataUri();
 
   const [signer, setSigner] = useState(null);
   const [showGame, setShowGame] = useState(false);
   const [showCompete, setShowCompete] = useState(false);
+  const [ownsToken, setOwnsToken] = useState(false);
 
   return (
     <div className="min-h-screen bg-bgDark text-white flex flex-col items-center">
@@ -36,32 +41,36 @@ export default function Home() {
         </p>
       </div>
 
-      {/* Buttons */}
-      <div className="mt-10 flex gap-6">
-        {signer && <Button className="bg-primary">Mint</Button>}
-
-        <Button className="bg-primary">Compete</Button>
-        <a href="#faq">
-          <Button className="bg-primary">FAQ</Button>
-        </a>
-      </div>
-
-      {/* NFT Preview */}
       <div className="mt-16 flex gap-6">
-        <div onClick={() => setShowGame(true)}>
-          <Card title="TRAIN" imageUrl={svg} description="Train me to fight!" />
-        </div>
-        <div
-          onClick={() => {
-            setShowCompete(true);
-          }}
-        >
-          <Card
-            title="COMPETE"
-            imageUrl={svg_2}
-            description="Compete against other NFTs!"
-          />
-        </div>
+        {/* Step 1 - Mint */}
+        <Card
+          title="STEP 1: MINT YOUR PoD"
+          imageUrl={svg_3}
+          description="Mint a personalized Proof-of-Defeat NFT that learns and evolves with your gameplay."
+          activated={!!signer}
+          action={() => {}}
+          lockedMessage="Connect your wallet to mint."
+        />
+
+        {/* Step 2 - Train */}
+        <Card
+          title="STEP 2: TRAIN YOUR AI"
+          imageUrl={svg}
+          description="Battle against your NFT to shape its strategy. The more you train, the smarter it gets!"
+          activated={ownsToken}
+          action={() => setShowGame(true)}
+          lockedMessage="Mint your NFT first to start training!"
+        />
+
+        {/* Step 3 - Compete */}
+        <Card
+          title="STEP 3: BATTLE OTHER NFTs"
+          imageUrl={svg_2}
+          description="Enter the arena and test your AI against others! Compete, win, and claim rewards."
+          activated={ownsToken}
+          action={() => setShowCompete(true)}
+          lockedMessage="Train your NFT first to compete!"
+        />
       </div>
 
       {showGame && <RPSGame onClose={() => setShowGame(false)} />}

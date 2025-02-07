@@ -154,11 +154,11 @@ impl Contract {
         let mut stored_q_values = self.q_table.get(state_key); // StorageGuard<StorageArray<StorageI32, 3>>
 
         // Extract current Q-values safely
-        let q_values: [i32; 3] = [
-            stored_q_values.deref().get(0).unwrap().as_i32(),
-            stored_q_values.deref().get(1).unwrap().as_i32(),
-            stored_q_values.deref().get(2).unwrap().as_i32(),
-        ];
+        // let q_values: [i32; 3] = [
+        //     stored_q_values.deref().get(0).unwrap().as_i32(),
+        //     stored_q_values.deref().get(1).unwrap().as_i32(),
+        //     stored_q_values.deref().get(2).unwrap().as_i32(),
+        // ];
 
         let action_idx: usize = player_move.to();
         let max_next_q = q_values.iter().cloned().max().unwrap_or(0);
