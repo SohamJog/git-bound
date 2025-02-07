@@ -47,9 +47,10 @@ pub struct Contract {
     //q_table: StorageArray<StorageI32, Q_TABLE_SIZE>,
     /// A counter used for RNG seeding.
     // TODO figure out encoding for indices
-    // q_table:  StorageArray<StorageI32, Q_TABLE_SIZE>,
-    q_table: StorageMap<u32, StorageArray<StorageI32, 3>>,
-    history: StorageArray<StorageI32, HISTORY_SIZE>,
+    // q_table: StorageMap<u32, StorageArray<StorageI32, 3>>,
+    // doing nested storage maps instead of storage array
+    q_table: StorageMap<u32, StorageMap<u32, StorageI32>>,
+    history: StorageMap<u32, StorageI32>,
     epsilon: StorageU32,
     alpha: StorageU32,
     gamma: StorageU32,
@@ -117,8 +118,14 @@ impl Contract {
         Ok(owner)
     }
 
-    pub fn choose_move(&self) -> U32 {
-        let state_key = Self::encode_state(&self.history) as u32;
+    pub fn choose_move(&self, player_move: U32) -> U32 {
+        let state_key = Self::encode_state(
+            self.history.get(1).as_u32(),
+            self.history.get(2).as_u32(),
+            self.history.get(3).as_u32(),
+            self.history.get(4).as_u32(),
+            player_move.to::<u32>(),
+        ) as u32;
         let (rand_val, new_seed) = Self::pseudo_random(self.rng_seed.get().to::<u32>());
         //self.rng_seed.set(U32::from(new_seed));
 
@@ -128,21 +135,21 @@ impl Contract {
             return U32::from(random_idx % 3); // Random move (0,1,2)
         }
 
-        let stored_q_values = self.q_table.get(state_key); // StorageGuard<StorageArray<StorageI32, 3>>
+        let q_values = self.q_table.get(state_key);
 
-        // Correct way to access StorageArray elements
-        let q_values: [i32; 3] = [
-            stored_q_values.deref().get(0).unwrap().as_i32(),
-            stored_q_values.deref().get(1).unwrap().as_i32(),
-            stored_q_values.deref().get(2).unwrap().as_i32(),
-        ];
+        // // Correct way to access StorageArray elements
+        // let q_values: [i32; 3] = [
+        //     stored_q_values.deref().get(0).unwrap().as_i32(),
+        //     stored_q_values.deref().get(1).unwrap().as_i32(),
+        //     stored_q_values.deref().get(2).unwrap().as_i32(),
+        // ];
 
         let mut best_action = 0;
-        let mut best_val = q_values[0];
+        let mut best_val = q_values.get(0);
 
         for i in 1..3 {
-            if q_values[i] > best_val {
-                best_val = q_values[i];
+            if q_values.get(i) > best_val {
+                best_val = q_values.get(i);
                 best_action = i as u32;
             }
         }
@@ -150,52 +157,74 @@ impl Contract {
     }
 
     pub fn update_q_value(&mut self, player_move: U32, reward: I32) {
-        let state_key = Self::encode_state(&self.history);
-        let mut stored_q_values = self.q_table.get(state_key); // StorageGuard<StorageArray<StorageI32, 3>>
+        let state_key = Self::encode_state(
+            self.history.get(0).as_u32(),
+            self.history.get(1).as_u32(),
+            self.history.get(2).as_u32(),
+            self.history.get(3).as_u32(),
+            self.history.get(4).as_u32(),
+        ) as u32;
+        let mut q_values = self.q_table.get(state_key); // Mapping for the specific state
 
-        // Extract current Q-values safely
-        // let q_values: [i32; 3] = [
-        //     stored_q_values.deref().get(0).unwrap().as_i32(),
-        //     stored_q_values.deref().get(1).unwrap().as_i32(),
-        //     stored_q_values.deref().get(2).unwrap().as_i32(),
-        // ];
+        // for i = 0 to 2, max_next_q = max(max_next_q, q_values.get(i))
+        let mut max_next_q = 0;
+        for i in 0..3 {
+            if q_values.get(i).as_i32() > max_next_q {
+                max_next_q = q_values.get(i).as_i32();
+            }
+        }
 
-        let action_idx: usize = player_move.to();
-        let max_next_q = q_values.iter().cloned().max().unwrap_or(0);
+        let action_idx: u32 = player_move.to();
+        //let max_next_q = q_values.iter().cloned().max().unwrap_or(0);
 
         let alpha = self.alpha.get().to::<i32>();
         let gamma = self.gamma.get().to::<i32>();
 
-        let delta = reward.as_i32() * 100 + (gamma * max_next_q) / 100 - q_values[action_idx];
+        let delta =
+            reward.as_i32() * 100 + (gamma * max_next_q) / 100 - q_values.get(action_idx).as_i32();
 
-        let mut stored_q_values = self.q_table.setter(state_key);
-        stored_q_values
+        let set_value =
+            I32::try_from(q_values.get(action_idx).as_i32() + (alpha * delta) / 100).unwrap();
+        let _ = self.q_table;
+
+        self.q_table
+            .setter(state_key)
             .setter(action_idx)
-            .unwrap()
-            .set(I32::try_from(q_values[action_idx] + (alpha * delta) / 100).unwrap());
+            .set(set_value);
 
-        for i in 0..(HISTORY_SIZE - 1) {
-            let next_value = self
-                .history
-                .getter(i + 1)
-                .map(|v| v.get())
-                .unwrap_or(I32::try_from(0).unwrap()); // First fetch immutable value
+        // update history. TODO: Write better code
+        let first = self.history.get(1);
+        let second = self.history.get(2);
+        let third = self.history.get(3);
+        let fourth = self.history.get(4);
+        let fifth = I32::try_from(player_move).unwrap();
+        self.history.setter(0).set(first);
+        self.history.setter(1).set(second);
+        self.history.setter(2).set(third);
+        self.history.setter(3).set(fourth);
+        self.history.setter(4).set(fifth);
+        // for i in 0..(HISTORY_SIZE - 1) {
+        //     let next_value = self
+        //         .history
+        //         .getter(i + 1)
+        //         .map(|v| v.get())
+        //         .unwrap_or(I32::try_from(0).unwrap()); // First fetch immutable value
 
-            if let Some(mut current) = self.history.setter(i) {
-                // Then mutate
-                current.set(next_value);
-            }
-        }
+        //     if let Some(mut current) = self.history.setter(i) {
+        //         // Then mutate
+        //         current.set(next_value);
+        //     }
+        // }
 
-        self.history
-            .setter(HISTORY_SIZE - 1)
-            .unwrap()
-            .set(I32::unchecked_from(player_move)); // Convert `U32` to `I32`
+        // self.history
+        //     .setter(HISTORY_SIZE - 1)
+        //     .unwrap()
+        //     .set(I32::unchecked_from(player_move)); // Convert `U32` to `I32`
     }
 
     /// Play a game of Rock Paper Scissors against the NFT.
     pub fn play(&mut self, player_move: U32) -> (U32, I32) {
-        let ai_move = self.choose_move();
+        let ai_move = self.choose_move(player_move);
         let ai_move_enum = Move::from_index(ai_move.to());
 
         let player_move_enum = Move::from_index(player_move.to());
@@ -215,14 +244,13 @@ impl Contract {
 
     /// Get the last 5 moves (history) for the UI.
     pub fn get_history(&self) -> [I32; HISTORY_SIZE] {
-        let mut history_arr = [I32::try_from(0).unwrap(); HISTORY_SIZE];
-
-        for i in 0..HISTORY_SIZE {
-            if let Some(value) = self.history.getter(i) {
-                history_arr[i] = value.get();
-            }
-        }
-
+        let mut history_arr = [
+            self.history.get(0),
+            self.history.get(1),
+            self.history.get(2),
+            self.history.get(3),
+            self.history.get(4),
+        ];
         history_arr
     }
 
@@ -232,11 +260,28 @@ impl Contract {
         let mut uri = String::new();
         write!(
             uri,
-            "https://api.dicebear.com/9.x/croodles/svg?seed={}",
-            self.owner.get()
+            "https://api.dicebear.com/9.x/croodles/svg?seed={}{}",
+            self.owner.get(),
+            self.balance_of(self.owner.get())
         )
         .unwrap();
         uri
+    }
+
+    // TODO: Make private
+    // If from is 1, then you find everything from 1 to 5, otherwise, history is 0 to 4
+    pub fn encode_state(first: u32, second: u32, third: u32, fourth: u32, fifth: u32) -> u32 {
+        let mut state = 0u32;
+        state += first * 3u32.pow(0);
+        state += second * 3u32.pow(1);
+        state += third * 3u32.pow(2);
+        state += fourth * 3u32.pow(3);
+        state += fifth * 3u32.pow(4);
+        state
+    }
+
+    pub fn get_q_value(&self, state: u32, action: u32) -> I32 {
+        self.q_table.get(state).get(action)
     }
 }
 
@@ -244,24 +289,13 @@ impl Contract {
 // TODO: have functions for q value index encoding etc.
 
 impl Contract {
+    // TODO: Make private
     fn pseudo_random(seed: u32) -> (u32, u32) {
         let a: u32 = 1664525;
         let c: u32 = 1013904223;
         let new_seed = seed.wrapping_mul(a).wrapping_add(c);
         let random = new_seed % 100;
         (random, new_seed)
-    }
-
-    fn encode_state(history: &StorageArray<StorageI32, HISTORY_SIZE>) -> u32 {
-        let mut state = 0u32;
-
-        for i in 0..HISTORY_SIZE {
-            if let Some(move_value) = history.getter(i) {
-                state += move_value.get().as_u32() * 3u32.pow(i as u32);
-            }
-        }
-
-        state
     }
 }
 
@@ -297,6 +331,11 @@ deployment tx hash: 0x07d4ffe31a8ffeacc92cc2dfc9110531aa6ca793c1c9e8f1f55b73a585
 contract activated and ready onchain with tx hash: 0x15c7f12af867410020d42d799e196a7be8eb4b2d34d84398e8e3bfd71e934fbe
 */
 
-
-
 // 0xa6e41ffd769491a42a6e5ce453259b93983a22ef
+
+// 0x4af567288e68cad4aa93a272fe6139ca53859c70
+
+// 0xf5ffd11a55afd39377411ab9856474d2a7cb697e
+
+
+// 0xdb2d15a3eb70c347e0d2c2c7861cafb946baab48
