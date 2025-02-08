@@ -238,16 +238,41 @@ impl Contract {
         ]
     }
 
+    // #[selector(name = "tokenURI")]
+    // pub fn token_uri(&self, _token_id: U256) -> String {
+    //     let mut uri = String::new();
+    //     write!(
+    //         uri,
+    //         "https://api.dicebear.com/9.x/croodles/svg?seed={}{}",
+    //         self.owner.get(),
+    //         self.balance_of(self.owner.get())
+    //     )
+    //     .unwrap();
+    //     uri
+    // }
     #[selector(name = "tokenURI")]
     pub fn token_uri(&self, _token_id: U256) -> String {
         let mut uri = String::new();
-        write!(
-            uri,
-            "https://api.dicebear.com/9.x/croodles/svg?seed={}{}",
+        let image_url = format!(
+            // "https://api.dicebear.com/9.x/croodles/svg?seed={}{}",
+            //"https://api.dicebear.com/9.x/croodles/png?seed={}{}",
+            "https://api.dicebear.com/9.x/croodles/svg?seed={}{}#svg",
             self.owner.get(),
             self.balance_of(self.owner.get())
+        );
+
+        let metadata = format!(
+            "{{\"name\":\"Proof-of-Defeat Rock Paper Scissor NFT\",\"description\":\"Your ultimate enemy in Rock-Paper-Scissors.\",\"image\":\"{}\"}}",
+            image_url
+        );
+
+        write!(
+            uri,
+            "data:application/json;base64,{}",
+            Self::base64_encode(metadata.as_bytes())
         )
         .unwrap();
+
         uri
     }
 
@@ -277,8 +302,44 @@ impl Contract {
         let random = new_seed % 100;
         (random, new_seed)
     }
+
+    // Base64 encoding helper function
+    fn base64_encode(input: &[u8]) -> String {
+        const ALPHABET: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+        let mut result = String::with_capacity((input.len() + 2) / 3 * 4);
+
+        for chunk in input.chunks(3) {
+            let b = match chunk.len() {
+                3 => ((chunk[0] as u32) << 16) | ((chunk[1] as u32) << 8) | (chunk[2] as u32),
+                2 => ((chunk[0] as u32) << 16) | ((chunk[1] as u32) << 8),
+                1 => (chunk[0] as u32) << 16,
+                _ => unreachable!(),
+            };
+
+            // Convert to base64 characters
+            result.push(ALPHABET[(b >> 18 & 0x3F) as usize] as char);
+            result.push(ALPHABET[(b >> 12 & 0x3F) as usize] as char);
+
+            if chunk.len() > 1 {
+                result.push(ALPHABET[(b >> 6 & 0x3F) as usize] as char);
+            } else {
+                result.push('=');
+            }
+
+            if chunk.len() > 2 {
+                result.push(ALPHABET[(b & 0x3F) as usize] as char);
+            } else {
+                result.push('=');
+            }
+        }
+
+        result
+    }
 }
 /*
+
+cargo stylus deploy \   --endpoint='https://sepolia-rollup.arbitrum.io/rpc' \ --private-key=""
+
 
 project metadata hash computed on deployment: "d91e49926b2ecb1242158fd598fdf3b73a345456b1a6cff30a40dff1eb4687ac"
 stripped custom section from user wasm to remove any sensitive data
@@ -319,4 +380,9 @@ contract activated and ready onchain with tx hash: 0x15c7f12af867410020d42d799e1
 // 0xdb2d15a3eb70c347e0d2c2c7861cafb946baab48
 
 // FINAL CONTRACT ADDRESS (WITHOUT PLAY):
-// 0x027d8146efa681dcfc8a6058a32d4577746df9c0
+// 0xC0f973971051BDB6892ffFDa7AD211B4DCB9C0a7
+
+
+// USING PNG: 0x80e39270be5cf5c135579163a57793deeb2e5d08
+
+// USING SVG: 0xbf1cc808b59ea20301d5f47ffe9b67cef93680f9

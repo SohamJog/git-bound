@@ -4,10 +4,12 @@ import { Button } from "./components/ui/Button";
 import { Card } from "./components/ui/Card";
 import { createAvatar } from "@dicebear/core";
 import { croodles } from "@dicebear/collection";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import RPSGame from "./components/RPSGame";
 import CompeteBox from "./components/CompeteBox";
 import FAQ from "./components/FAQ";
+import { getBalance } from "@/lib/utils";
+import MintPopup from "./components/MintPopup";
 
 export default function Home() {
   const avatar = createAvatar(croodles, {
@@ -28,10 +30,29 @@ export default function Home() {
   const [showGame, setShowGame] = useState(false);
   const [showCompete, setShowCompete] = useState(false);
   const [ownsToken, setOwnsToken] = useState(false);
+  const [showMintBox, setShowMintBox] = useState(false);
+  const [userAddress, setUserAddress] = useState(null);
+
+  useEffect(() => {
+    const fetchAddressAndBalance = async () => {
+      if (signer) {
+        try {
+          const address = await signer.getAddress();
+
+          const balance = await getBalance(signer);
+          setOwnsToken(balance > 0);
+        } catch (error) {
+          console.error("Error fetching address or balance:", error);
+        }
+      }
+    };
+
+    fetchAddressAndBalance();
+  }, [signer]);
 
   return (
     <div className="min-h-screen bg-bgDark text-white flex flex-col items-center">
-      <NavBar setSigner={setSigner} />
+      <NavBar setSigner={setSigner} setUserAddress={setUserAddress} />
       <div className="text-center mt-10">
         <h1 className="text-4xl font-pixel text-primary">
           Welcome to Proof-of-Defeat
@@ -48,7 +69,7 @@ export default function Home() {
           imageUrl={svg_3}
           description="Mint a personalized Proof-of-Defeat NFT that learns and evolves with your gameplay."
           activated={!!signer}
-          action={() => {}}
+          action={() => setShowMintBox(true)}
           lockedMessage="Connect your wallet to mint."
         />
 
@@ -75,6 +96,14 @@ export default function Home() {
 
       {showGame && <RPSGame onClose={() => setShowGame(false)} />}
       {showCompete && <CompeteBox onClose={() => setShowCompete(false)} />}
+      {showMintBox && (
+        <MintPopup
+          onClose={() => setShowMintBox(false)}
+          signer={signer}
+          userAddress={userAddress}
+          ownsToken={ownsToken}
+        />
+      )}
       <div className="min-h-screen bg-bgDark text-white flex flex-col items-center">
         {/* Other sections */}
         <FAQ />

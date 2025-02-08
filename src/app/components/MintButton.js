@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { ethers } from "ethers";
-import { CONTRACT_ADDRESS, ABI } from "@/lib/mintSBT";
+import { CONTRACT_ADDRESS, ABI } from "@/lib/utils";
 
 export default function MintSBTButton({ signer, userSkills }) {
   const [minting, setMinting] = useState(false);

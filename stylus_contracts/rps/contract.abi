@@ -109,7 +109,13 @@
     "type": "function"
   },
   {
-    "inputs": [],
+    "inputs": [
+      {
+        "internalType": "uint32",
+        "name": "player_move",
+        "type": "uint32"
+      }
+    ],
     "name": "chooseMove",
     "outputs": [
       {
@@ -118,7 +124,7 @@
         "type": "uint32"
       }
     ],
-    "stateMutability": "nonpayable",
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -140,37 +146,95 @@
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "uint32",
-        "name": "player_move",
-        "type": "uint32"
-      }
-    ],
-    "name": "play",
-    "outputs": [
-      {
-        "internalType": "uint32",
-        "name": "",
-        "type": "uint32"
-      },
-      {
-        "internalType": "int32",
-        "name": "",
-        "type": "int32"
-      }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
     "inputs": [],
     "name": "getHistory",
     "outputs": [
       {
-        "internalType": "int32[5]",
+        "internalType": "uint32[5]",
         "name": "",
-        "type": "int32[5]"
+        "type": "uint32[5]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_token_id",
+        "type": "uint256"
+      }
+    ],
+    "name": "tokenURI",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint32",
+        "name": "first",
+        "type": "uint32"
+      },
+      {
+        "internalType": "uint32",
+        "name": "second",
+        "type": "uint32"
+      },
+      {
+        "internalType": "uint32",
+        "name": "third",
+        "type": "uint32"
+      },
+      {
+        "internalType": "uint32",
+        "name": "fourth",
+        "type": "uint32"
+      },
+      {
+        "internalType": "uint32",
+        "name": "fifth",
+        "type": "uint32"
+      }
+    ],
+    "name": "encodeState",
+    "outputs": [
+      {
+        "internalType": "uint32",
+        "name": "",
+        "type": "uint32"
+      }
+    ],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint32",
+        "name": "state",
+        "type": "uint32"
+      },
+      {
+        "internalType": "uint32",
+        "name": "action",
+        "type": "uint32"
+      }
+    ],
+    "name": "getQValue",
+    "outputs": [
+      {
+        "internalType": "int32",
+        "name": "",
+        "type": "int32"
       }
     ],
     "stateMutability": "view",

@@ -2,47 +2,17 @@
 
 import { useState } from "react";
 import { ethers } from "ethers";
+import { connectWallet } from "@/lib/utils";
 
-export default function ConnectWalletButton({ onWalletConnected }) {
+export default function ConnectWalletButton({ onWalletConnected, setUserAddress }) {
   const [walletAddress, setWalletAddress] = useState(null);
   const [connecting, setConnecting] = useState(false);
 
-  const connectWallet = async () => {
-    try {
-      let signer = null;
-
-      let provider;
-      if (window.ethereum == null) {
-        // If MetaMask is not installed, we use the default provider,
-        // which is backed by a variety of third-party services (such
-        // as INFURA). They do not have private keys installed,
-        // so they only have read-only access
-        console.log("MetaMask not installed; using read-only defaults");
-        provider = ethers.getDefaultProvider();
-      } else {
-        setConnecting(true);
-        provider = new ethers.BrowserProvider(window.ethereum);
-        await window.ethereum.request({ method: "eth_requestAccounts" });
-        signer = await provider.getSigner();
-      }
-
-      const address = await signer.getAddress();
-
-      setWalletAddress(address);
-      onWalletConnected(signer); // Pass signer to parent component
-    } catch (error) {
-      console.error("Wallet connection failed:", error);
-      alert(
-        "Failed to connect wallet. Ensure MetaMask is installed and unlocked."
-      );
-    } finally {
-      setConnecting(false);
-    }
-  };
-
   return (
     <button
-      onClick={connectWallet}
+      onClick={() =>
+        connectWallet(setWalletAddress, setConnecting, onWalletConnected, setUserAddress)
+      }
       className={`px-6 py-3 text-lg font-bold rounded-xl shadow-md transition-all duration-200
     ${
       connecting
