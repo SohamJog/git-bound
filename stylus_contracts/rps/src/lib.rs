@@ -103,26 +103,14 @@ impl Contract {
         "Your ultimate enemy in Rock-Paper-Scissors.".to_string()
     }
 
+    // Technically not the balance, but the latest token id minted by owner
     pub fn balance_of(&self, owner: Address) -> U256 {
-        if self.owner_to_token.get(owner) == U32::from(0) {
-            return U256::from(0);
-        }
-        return U256::from(1);
+        U256::from(self.owner_to_token.get(owner))
     }
 
-    // pub fn owner_of(&self, token_id: U256) -> Result<Address, Vec<u8>> {
-    //     if token_id != U256::from(1) {
-    //         return Err("Invalid token ID".as_bytes().to_vec());
-    //     }
-
-    //     let owner = self.owner.get();
-
-    //     if owner == Address::ZERO {
-    //         return Err("Token not minted".as_bytes().to_vec());
-    //     }
-
-    //     Ok(owner)
-    // }
+    pub fn owner_of(&self, token_id: U256) -> Address {
+      self.nft_owners.get(token_id)
+    }
 
     pub fn choose_move(&self, player_move: U32, sender: Address) -> U32 {
         // Ensure valid player move (0,1,2)
@@ -368,3 +356,5 @@ contract activated and ready onchain with tx hash: 0x15c7f12af867410020d42d799e1
 
 
 // CONTRACT ADDRESS (MULTIPlE NFT OWNERS): 0x37e4eaadd0e68a91ea02ff482bb91889e90ee331
+
+// FINAL CONTRACT: 0x28f676127f615f80fcfc34d9459997d4c17bb475

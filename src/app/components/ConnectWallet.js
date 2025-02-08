@@ -2,16 +2,24 @@
 
 import { useState } from "react";
 import { ethers } from "ethers";
-import { connectWallet } from "@/lib/utils";
+import { connectWallet } from "@/lib/train_utils";
 
-export default function ConnectWalletButton({ onWalletConnected, setUserAddress }) {
+export default function ConnectWalletButton({
+  onWalletConnected,
+  setUserAddress,
+}) {
   const [walletAddress, setWalletAddress] = useState(null);
   const [connecting, setConnecting] = useState(false);
 
   return (
     <button
       onClick={() =>
-        connectWallet(setWalletAddress, setConnecting, onWalletConnected, setUserAddress)
+        connectWallet(
+          setWalletAddress,
+          setConnecting,
+          onWalletConnected,
+          setUserAddress
+        )
       }
       className={`px-6 py-3 text-lg font-bold rounded-xl shadow-md transition-all duration-200
     ${

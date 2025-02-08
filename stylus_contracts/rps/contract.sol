@@ -19,6 +19,8 @@ interface IContract  {
 
     function balanceOf(address owner) external view returns (uint256);
 
+    function ownerOf(uint256 token_id) external view returns (address);
+
     function chooseMove(uint32 player_move, address sender) external view returns (uint32);
 
     function updateQValue(uint32 player_move, int32 reward, address sender) external;

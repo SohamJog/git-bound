@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { mint } from "@/lib/utils";
+import { mint } from "@/lib/train_utils";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { createAvatar } from "@dicebear/core";

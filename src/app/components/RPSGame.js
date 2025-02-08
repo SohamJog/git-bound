@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { chooseMove, updateQValue } from "@/lib/utils";
+import { chooseMove, updateQValue } from "@/lib/train_utils";
 
 const moves = ["Rock", "Paper", "Scissors"];
 const icons = { Rock: "✊", Paper: "✋", Scissors: "✌️" };

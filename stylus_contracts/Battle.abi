@@ -1,0 +1,87 @@
+[
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "token1",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "token2",
+				"type": "uint256"
+			}
+		],
+		"name": "battle",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_aiContract",
+				"type": "address"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "token1",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "token2",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "winner",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint8",
+				"name": "score1",
+				"type": "uint8"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint8",
+				"name": "score2",
+				"type": "uint8"
+			}
+		],
+		"name": "BattleResult",
+		"type": "event"
+	},
+	{
+		"inputs": [],
+		"name": "aiContract",
+		"outputs": [
+			{
+				"internalType": "contract IContract",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}
+]

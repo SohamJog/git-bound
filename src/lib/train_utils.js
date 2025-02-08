@@ -2,7 +2,7 @@ import { ethers } from "ethers";
 
 export const CONTRACT_ADDRESS = "0x2f670C6b1FD1Cb373cd1f13F23b5505f315ff4B4";
 // export const ARBITRUM_CONTRACT = "0xC0f973971051BDB6892ffFDa7AD211B4DCB9C0a7";
-export const ARBITRUM_CONTRACT = "0x37e4eaadd0e68a91ea02ff482bb91889e90ee331";
+export const ARBITRUM_CONTRACT = "0x28f676127f615f80fcfc34d9459997d4c17bb475";
 
 export const ABI = [
   {
@@ -96,6 +96,25 @@ export const ABI = [
         internalType: "uint256",
         name: "",
         type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "token_id",
+        type: "uint256",
+      },
+    ],
+    name: "ownerOf",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
       },
     ],
     stateMutability: "view",
@@ -368,9 +387,10 @@ export async function getBalance(signer) {
 
 export async function chooseMove(signer, playerMove) {
   try {
+    const address = await signer.getAddress();
     const contract = new ethers.Contract(ARBITRUM_CONTRACT, ABI, signer);
 
-    const tx = await contract.chooseMove(playerMove);
+    const tx = await contract.chooseMove(playerMove, address);
 
     console.log("Move Chosen:", tx);
     return tx;
@@ -386,9 +406,10 @@ export async function chooseMove(signer, playerMove) {
  */
 export async function updateQValue(signer, playerMove, reward) {
   try {
+    const address = await signer.getAddress();
     const contract = new ethers.Contract(ARBITRUM_CONTRACT, ABI, signer);
 
-    const tx = await contract.updateQValue(playerMove, reward);
+    const tx = await contract.updateQValue(playerMove, reward, address);
     const receipt = await signer.provider.waitForTransaction(tx.hash);
 
     console.log("QValue Updated:", receipt);

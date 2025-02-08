@@ -8,7 +8,7 @@ import { useState, useEffect } from "react";
 import RPSGame from "./components/RPSGame";
 import CompeteBox from "./components/CompeteBox";
 import FAQ from "./components/FAQ";
-import { getBalance } from "@/lib/utils";
+import { getBalance } from "@/lib/train_utils";
 import MintPopup from "./components/MintPopup";
 
 export default function Home() {

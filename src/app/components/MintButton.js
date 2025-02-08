@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { ethers } from "ethers";
-import { CONTRACT_ADDRESS, ABI } from "@/lib/utils";
+import { CONTRACT_ADDRESS, ABI } from "@/lib/train_utils";
 
 export default function MintSBTButton({ signer, userSkills }) {
   const [minting, setMinting] = useState(false);
@@ -19,7 +19,9 @@ export default function MintSBTButton({ signer, userSkills }) {
       const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
 
       const userAddress = await signer.getAddress();
-      const metadataURI = `data:application/json;base64,${btoa(JSON.stringify(userSkills))}`;
+      const metadataURI = `data:application/json;base64,${btoa(
+        JSON.stringify(userSkills)
+      )}`;
 
       const tx = await contract.mint(userAddress, metadataURI);
       await tx.wait();
@@ -36,8 +38,8 @@ export default function MintSBTButton({ signer, userSkills }) {
 
   return (
     <div className="flex flex-col items-center">
-      <button 
-        onClick={mintSBT} 
+      <button
+        onClick={mintSBT}
         className="px-4 py-2 bg-green-600 text-white rounded"
         disabled={minting}
       >
@@ -47,10 +49,10 @@ export default function MintSBTButton({ signer, userSkills }) {
       {txHash && (
         <p className="mt-2">
           View Transaction:{" "}
-          <a 
-            href={`https://goerli.etherscan.io/tx/${txHash}`} 
-            target="_blank" 
-            rel="noopener noreferrer" 
+          <a
+            href={`https://goerli.etherscan.io/tx/${txHash}`}
+            target="_blank"
+            rel="noopener noreferrer"
             className="text-blue-400 underline"
           >
             Etherscan
