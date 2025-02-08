@@ -1,22 +1,34 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { battle } from "@/lib/battle_utils";
+import { getBalance } from "@/lib/train_utils";
 
-const CompeteBox = ({ onClose }) => {
-  const [roomCode, setRoomCode] = useState("");
-  const [inputCode, setInputCode] = useState("");
-  const [copied, setCopied] = useState(false);
+const CompeteBox = ({ onClose, signer, userToken }) => {
+  const [opponentToken, setOpponentToken] = useState("");
+  const [battling, setBattling] = useState(false);
+  const [result, setResult] = useState(null);
 
-  // Generate a random room code
-  const generateRoomCode = () => {
-    const code = Math.random().toString(36).substring(2, 8).toUpperCase();
-    setRoomCode(code);
-    setCopied(false);
-  };
+  const handleBattle = async () => {
+    if (!userToken || !opponentToken) return;
 
-  // Copy room code to clipboard
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(roomCode);
-    setCopied(true);
+    try {
+      setBattling(true);
+      setResult(null);
+
+      const receipt = await battle(userToken, opponentToken, signer);
+      console.log("Battle Receipt:", receipt);
+
+      // Extract winner from logs (simplified approach)
+      const logs = receipt.logs;
+      console.log("Logs:", logs);
+      const winner = logs.length > 0 ? logs[0].data : "Unknown";
+
+      setResult(`Winner: ${winner}`);
+    } catch (error) {
+      setResult("Battle Failed!");
+    } finally {
+      setBattling(false);
+    }
   };
 
   return (
@@ -29,54 +41,45 @@ const CompeteBox = ({ onClose }) => {
       >
         <h2 className="text-3xl font-bold mb-4 text-yellow-800">Compete</h2>
 
-        {/* New Room Section */}
-        <div className="mb-6">
-          <h3 className="text-lg font-semibold text-yellow-800 mb-2">
-            New Room
-          </h3>
-          <button
-            onClick={generateRoomCode}
-            className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg transition"
-          >
-            Generate Room Code
-          </button>
-
-          {roomCode && (
-            <div className="mt-4 p-3 bg-gray-700 rounded-md flex items-center justify-between">
-              <span className="text-lg font-mono text-white">{roomCode}</span>
-              <button
-                onClick={copyToClipboard}
-                className="text-sm text-gray-300 hover:text-white"
-              >
-                {copied ? "Copied!" : "Copy"}
-              </button>
-            </div>
+        {/* Display User's Token */}
+        <div className="mb-4 text-lg text-black">
+          {userToken ? (
+            <p>
+              Your NFT Token ID: <span className="font-bold">{userToken}</span>
+            </p>
+          ) : (
+            <p className="text-red-600">You don’t own an NFT.</p>
           )}
         </div>
 
-        {/* Fight a Friend Section */}
-        <div>
-          <h3 className="text-lg font-semibold text-yellow-800 mb-2">
-            Fight a Friend
-          </h3>
-          <input
-            type="text"
-            placeholder="Enter Room Code"
-            value={inputCode}
-            onChange={(e) => setInputCode(e.target.value)}
-            className="w-full p-2 rounded-md bg-gray-700 text-white placeholder-gray-400 outline-none"
-          />
-          <button
-            className={`w-full mt-2 py-2 rounded-lg ${
-              inputCode
-                ? "bg-green-500 hover:bg-green-600 text-white"
-                : "bg-gray-500 cursor-not-allowed"
-            } transition`}
-            disabled={!inputCode}
-          >
-            Join Room
-          </button>
-        </div>
+        {/* Input Opponent's Token ID */}
+        <input
+          type="text"
+          placeholder="Enter opponent's Token ID"
+          value={opponentToken}
+          onChange={(e) => setOpponentToken(e.target.value)}
+          className="w-full p-2 rounded-md bg-gray-700 text-white placeholder-gray-400 outline-none"
+        />
+
+        {/* Battle Button */}
+        <button
+          onClick={handleBattle}
+          className={`w-full mt-4 py-2 rounded-lg ${
+            userToken && opponentToken
+              ? "bg-green-500 hover:bg-green-600 text-white"
+              : "bg-gray-500 cursor-not-allowed"
+          } transition`}
+          disabled={!userToken || !opponentToken || battling}
+        >
+          {battling ? "Battling..." : "Start Battle"}
+        </button>
+
+        {/* Battle Result Display */}
+        {result && (
+          <div className="mt-4 p-3 bg-gray-800 text-white rounded-md">
+            {result}
+          </div>
+        )}
 
         {/* Back Button */}
         <button

@@ -32,6 +32,7 @@ export default function Home() {
   const [ownsToken, setOwnsToken] = useState(false);
   const [showMintBox, setShowMintBox] = useState(false);
   const [userAddress, setUserAddress] = useState(null);
+  const [userToken, setUserToken] = useState(0);
 
   useEffect(() => {
     const fetchAddressAndBalance = async () => {
@@ -41,6 +42,7 @@ export default function Home() {
 
           const balance = await getBalance(signer);
           setOwnsToken(balance > 0);
+          setUserToken(balance);
         } catch (error) {
           console.error("Error fetching address or balance:", error);
         }
@@ -101,7 +103,13 @@ export default function Home() {
           userAddress={userAddress}
         />
       )}
-      {showCompete && <CompeteBox onClose={() => setShowCompete(false)} />}
+      {showCompete && (
+        <CompeteBox
+          onClose={() => setShowCompete(false)}
+          signer={signer}
+          userToken={userToken}
+        />
+      )}
       {showMintBox && (
         <MintPopup
           onClose={() => setShowMintBox(false)}
