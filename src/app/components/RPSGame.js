@@ -1,25 +1,21 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
+import { chooseMove, updateQValue } from "@/lib/utils";
 
 const moves = ["Rock", "Paper", "Scissors"];
 const icons = { Rock: "✊", Paper: "✋", Scissors: "✌️" };
 
-const getRandomMove = () => moves[Math.floor(Math.random() * moves.length)];
-
-const RPSGame = ({ onClose }) => {
+const RPSGame = ({ onClose, signer, userAddress }) => {
   const [playerMove, setPlayerMove] = useState(null);
   const [aiMove, setAiMove] = useState(null);
   const [result, setResult] = useState("");
   const [score, setScore] = useState({ player: 0, ai: 0, draws: 0 });
+  const [loading, setLoading] = useState(false);
 
   const determineWinner = (player, ai) => {
-    if (
-      (player === "Rock" && ai === "Rock") ||
-      (player === "Paper" && ai === "Paper") ||
-      (player === "Scissors" && ai === "Scissors")
-    ) {
+    if (player === ai) {
       setScore((prev) => ({ ...prev, draws: prev.draws + 1 }));
-      return "It's a Draw! 🤝";
+      return { message: "It's a Draw! 🤝", reward: 0 };
     }
     if (
       (player === "Rock" && ai === "Scissors") ||
@@ -27,18 +23,40 @@ const RPSGame = ({ onClose }) => {
       (player === "Scissors" && ai === "Paper")
     ) {
       setScore((prev) => ({ ...prev, player: prev.player + 1 }));
-      return "You Win! 🎉";
+      return { message: "You Win! 🎉", reward: 1 };
     } else {
       setScore((prev) => ({ ...prev, ai: prev.ai + 1 }));
-      return "AI Wins! 🤖";
+      return { message: "AI Wins! 🤖", reward: -1 };
     }
   };
 
-  const playRound = (move) => {
+  const convertMoveToIndex = (move) => {
+    return moves.indexOf(move);
+  };
+
+  const playRound = async (move) => {
     setPlayerMove(move);
-    const aiChoice = getRandomMove();
-    setAiMove(aiChoice);
-    setResult(determineWinner(move, aiChoice));
+    setLoading(true);
+
+    try {
+      // 🔹 Call contract to get AI move
+      const aiChoice = await chooseMove(signer, convertMoveToIndex(move));
+      const aiMoveIndex = parseInt(aiChoice, 10);
+      const aiMoveStr = moves[aiMoveIndex];
+
+      setAiMove(aiMoveStr);
+
+      // 🔹 Determine result
+      const { message, reward } = determineWinner(move, aiMoveStr);
+      setResult(message);
+
+      // 🔹 Call contract to update Q-table with the reward
+      await updateQValue(signer, convertMoveToIndex(move), reward);
+    } catch (error) {
+      console.error("Error playing round:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -59,6 +77,7 @@ const RPSGame = ({ onClose }) => {
               key={move}
               onClick={() => playRound(move)}
               className="rps-button text-5xl"
+              disabled={loading}
             >
               {icons[move]}
             </button>

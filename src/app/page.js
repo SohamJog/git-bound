@@ -94,7 +94,13 @@ export default function Home() {
         />
       </div>
 
-      {showGame && <RPSGame onClose={() => setShowGame(false)} />}
+      {showGame && (
+        <RPSGame
+          onClose={() => setShowGame(false)}
+          signer={signer}
+          userAddress={userAddress}
+        />
+      )}
       {showCompete && <CompeteBox onClose={() => setShowCompete(false)} />}
       {showMintBox && (
         <MintPopup

@@ -357,13 +357,11 @@ export async function getBalance(signer) {
  * Calls the chooseMove function in the contract
  */
 
-export async function chooseMove(playerMove) {
+export async function chooseMove(signer, playerMove) {
   try {
-    const signer = await connectWallet();
     const contract = new ethers.Contract(ARBITRUM_CONTRACT, ABI, signer);
 
     const tx = await contract.chooseMove(playerMove);
-    await tx.wait();
 
     console.log("Move Chosen:", tx);
     return tx;
@@ -377,16 +375,15 @@ export async function chooseMove(playerMove) {
 /**
  * Calls the updateQValue function in the contract
  */
-export async function updateQValue(playerMove, reward) {
+export async function updateQValue(signer, playerMove, reward) {
   try {
-    const signer = await connectWallet();
     const contract = new ethers.Contract(ARBITRUM_CONTRACT, ABI, signer);
 
     const tx = await contract.updateQValue(playerMove, reward);
-    await tx.wait();
+    const receipt = await signer.provider.waitForTransaction(tx.hash);
 
-    console.log("QValue Updated:", tx);
-    return tx;
+    console.log("QValue Updated:", receipt);
+    return receipt;
   } catch (error) {
     console.error("Update Failed:", error);
     alert("Transaction failed. Make sure you have enough gas fees.");
