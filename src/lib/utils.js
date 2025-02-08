@@ -1,7 +1,8 @@
 import { ethers } from "ethers";
 
 export const CONTRACT_ADDRESS = "0x2f670C6b1FD1Cb373cd1f13F23b5505f315ff4B4";
-export const ARBITRUM_CONTRACT = "0xC0f973971051BDB6892ffFDa7AD211B4DCB9C0a7";
+// export const ARBITRUM_CONTRACT = "0xC0f973971051BDB6892ffFDa7AD211B4DCB9C0a7";
+export const ARBITRUM_CONTRACT = "0x37e4eaadd0e68a91ea02ff482bb91889e90ee331";
 
 export const ABI = [
   {
@@ -32,7 +33,13 @@ export const ABI = [
       },
     ],
     name: "mint",
-    outputs: [],
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
     stateMutability: "nonpayable",
     type: "function",
   },
@@ -97,28 +104,14 @@ export const ABI = [
   {
     inputs: [
       {
-        internalType: "uint256",
-        name: "token_id",
-        type: "uint256",
-      },
-    ],
-    name: "ownerOf",
-    outputs: [
-      {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
         internalType: "uint32",
         name: "player_move",
         type: "uint32",
+      },
+      {
+        internalType: "address",
+        name: "sender",
+        type: "address",
       },
     ],
     name: "chooseMove",
@@ -144,6 +137,11 @@ export const ABI = [
         name: "reward",
         type: "int32",
       },
+      {
+        internalType: "address",
+        name: "sender",
+        type: "address",
+      },
     ],
     name: "updateQValue",
     outputs: [],
@@ -151,7 +149,13 @@ export const ABI = [
     type: "function",
   },
   {
-    inputs: [],
+    inputs: [
+      {
+        internalType: "address",
+        name: "user",
+        type: "address",
+      },
+    ],
     name: "getHistory",
     outputs: [
       {
@@ -223,6 +227,11 @@ export const ABI = [
   },
   {
     inputs: [
+      {
+        internalType: "address",
+        name: "user",
+        type: "address",
+      },
       {
         internalType: "uint32",
         name: "state",

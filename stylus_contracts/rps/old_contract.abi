@@ -27,13 +27,7 @@
       }
     ],
     "name": "mint",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
+    "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },
@@ -98,14 +92,28 @@
   {
     "inputs": [
       {
+        "internalType": "uint256",
+        "name": "token_id",
+        "type": "uint256"
+      }
+    ],
+    "name": "ownerOf",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "uint32",
         "name": "player_move",
         "type": "uint32"
-      },
-      {
-        "internalType": "address",
-        "name": "sender",
-        "type": "address"
       }
     ],
     "name": "chooseMove",
@@ -130,11 +138,6 @@
         "internalType": "int32",
         "name": "reward",
         "type": "int32"
-      },
-      {
-        "internalType": "address",
-        "name": "sender",
-        "type": "address"
       }
     ],
     "name": "updateQValue",
@@ -143,13 +146,7 @@
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "user",
-        "type": "address"
-      }
-    ],
+    "inputs": [],
     "name": "getHistory",
     "outputs": [
       {
@@ -221,11 +218,6 @@
   },
   {
     "inputs": [
-      {
-        "internalType": "address",
-        "name": "user",
-        "type": "address"
-      },
       {
         "internalType": "uint32",
         "name": "state",

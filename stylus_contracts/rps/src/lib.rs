@@ -32,6 +32,10 @@ const fn pow3(exp: usize) -> usize {
 }
 
 const Q_TABLE_SIZE: usize = pow3(HISTORY_SIZE);
+const rng_seed: u32 = 42;
+const epsilon: u32 = 20;
+const alpha: u32 = 10;
+const gamma: u32 = 90;
 
 sol! {
     event TrainingCompleted();
@@ -40,13 +44,11 @@ sol! {
 #[entrypoint]
 #[storage]
 pub struct Contract {
-    owner: StorageAddress,
-    q_table: StorageMap<u32, StorageMap<u32, StorageI32>>,
-    history: StorageMap<u32, StorageU32>,
-    epsilon: StorageU32,
-    alpha: StorageU32,
-    gamma: StorageU32,
-    rng_seed: StorageU32,
+    nft_owners: StorageMap<U256, StorageAddress>, // tokenId -> owner
+    owner_to_token: StorageMap<Address, StorageU32>,
+    q_table: StorageMap<Address, StorageMap<u32, StorageMap<u32, StorageI32>>>, // user -> state -> action -> q-value
+    history: StorageMap<Address, StorageMap<u32, StorageU32>>, // user -> last 5 moves
+    total_supply: StorageU32,                                  // Keeps track of token count
 }
 
 #[public]
@@ -60,35 +62,33 @@ impl Contract {
         id == 0x5b5e139f // ERC-721Metadata
     }
 
-    pub fn mint(&mut self, to: Address) {
-        // Ensure the contract hasn't been initialized yet
-        if self.owner.get() != Address::ZERO {
-            return;
-        }
+    pub fn mint(&mut self, to: Address) -> U256 {
+        let token_id = self.total_supply.get().to::<u32>() + 1;
 
-        self.owner.set(to);
-        self.rng_seed.set(U32::from(42));
-        self.epsilon.set(U32::from(20));
-        self.alpha.set(U32::from(10));
-        self.gamma.set(U32::from(90));
+        self.nft_owners.setter(U256::from(token_id)).set(to);
+        self.total_supply.set(U32::from(token_id));
+        self.owner_to_token.setter(to).set(U32::from(token_id));
 
         // Initialize history with zeros
+        let mut history = self.history.setter(to);
         for i in 0..HISTORY_SIZE {
-            self.history.setter(i as u32).set(U32::from(0));
+            history.setter(i as u32).set(U32::from(0));
         }
 
-        // Initialize Q-table with small random values for initial exploration
+        // Initialize Q-table
         let mut current_seed = 42u32;
+        let mut user_q_table = self.q_table.setter(to);
         for state in 0..Q_TABLE_SIZE {
-            let mut state_map = self.q_table.setter(state as u32);
+            let mut state_map = user_q_table.setter(state as u32);
             for action in 0..3 {
                 let (rand_val, new_seed) = Self::pseudo_random(current_seed);
                 current_seed = new_seed;
-                // Initialize with small random values between -10 and 10
                 let small_random = I32::try_from((rand_val as i32 % 21) - 10).unwrap();
                 state_map.setter(action).set(small_random);
             }
         }
+
+        U256::from(token_id)
     }
 
     pub fn symbol(&self) -> String {
@@ -104,137 +104,120 @@ impl Contract {
     }
 
     pub fn balance_of(&self, owner: Address) -> U256 {
-        if owner == self.owner.get() {
-            U256::from(1)
-        } else {
-            U256::from(0)
+        if self.owner_to_token.get(owner) == U32::from(0) {
+            return U256::from(0);
         }
+        return U256::from(1);
     }
 
-    pub fn owner_of(&self, token_id: U256) -> Result<Address, Vec<u8>> {
-        if token_id != U256::from(1) {
-            return Err("Invalid token ID".as_bytes().to_vec());
-        }
+    // pub fn owner_of(&self, token_id: U256) -> Result<Address, Vec<u8>> {
+    //     if token_id != U256::from(1) {
+    //         return Err("Invalid token ID".as_bytes().to_vec());
+    //     }
 
-        let owner = self.owner.get();
+    //     let owner = self.owner.get();
 
-        if owner == Address::ZERO {
-            return Err("Token not minted".as_bytes().to_vec());
-        }
+    //     if owner == Address::ZERO {
+    //         return Err("Token not minted".as_bytes().to_vec());
+    //     }
 
-        Ok(owner)
-    }
+    //     Ok(owner)
+    // }
 
-    pub fn choose_move(&self, player_move: U32) -> U32 {
-        // Ensure player_move is valid (0, 1, or 2)
-
+    pub fn choose_move(&self, player_move: U32, sender: Address) -> U32 {
+        // Ensure valid player move (0,1,2)
         if player_move.to::<u32>() > 2 {
             return U32::from(0);
         }
-        // Default to a random move initially
-        let (random_move, _) = Self::pseudo_random(self.rng_seed.get().to::<u32>());
-        let default_move = U32::from(random_move % 3);
 
-        // Calculate state key
+        let history = self.history.get(sender);
         let state_key = Self::encode_state(
-            self.history.get(1).to::<u32>() % 3,
-            self.history.get(2).to::<u32>() % 3,
-            self.history.get(3).to::<u32>() % 3,
-            self.history.get(4).to::<u32>() % 3,
-            player_move.to::<u32>() % 3,
-        ) as u32;
+            history.get(0).to::<u32>(),
+            history.get(1).to::<u32>(),
+            history.get(2).to::<u32>(),
+            history.get(3).to::<u32>(),
+            player_move.to::<u32>(),
+        );
 
-        // Check if contract is initialized (owner is set)
-        // TODO: moe above afterwards
-        if self.owner.get() == Address::ZERO {
-            return default_move;
+        // Random exploration
+        let (rand_val, _) = Self::pseudo_random(rng_seed);
+        if rand_val < epsilon {
+            return U32::from(rand_val % 3);
         }
 
-        // Random exploration with epsilon probability
-        let (rand_val, _) = Self::pseudo_random(self.rng_seed.get().to::<u32>());
-        if rand_val < self.epsilon.get().to::<u32>() {
-            return default_move;
-        }
-
-        // // Get Q-values for current state
-        // let q_values = self.q_table.get(state_key);
-        // let mut best_action = 0;
-        // let mut best_val = q_values.get(0);
-
-        // // Find action with highest Q-value
-        // for i in 1..3 {
-        //     let current_val = q_values.get(i);
-        //     if current_val > best_val {
-        //         best_val = current_val;
-        //         best_action = i as u32;
-        //     }
-        // }
-
+        let q_table = self.q_table.get(sender);
         let mut best_action = 0;
         let mut best_val = I32::try_from(-200).unwrap();
 
         for action in 0..3 {
-            let current_val = self.get_q_value(state_key, action);
-            if best_val > current_val {
+            let current_val = q_table.get(state_key).get(action);
+            if current_val > best_val {
                 best_action = action;
+                best_val = current_val;
             }
         }
 
         U32::from(best_action)
     }
 
-    pub fn update_q_value(&mut self, player_move: U32, reward: I32) {
-        let state_key = Self::encode_state(
-            self.history.get(0).to::<u32>(),
-            self.history.get(1).to::<u32>(),
-            self.history.get(2).to::<u32>(),
-            self.history.get(3).to::<u32>(),
-            self.history.get(4).to::<u32>(),
-        ) as u32;
-        let q_values = self.q_table.get(state_key);
+    pub fn update_q_value(&mut self, player_move: U32, reward: I32, sender: Address) {
+        let history = self.history.get(sender);
 
-        let mut max_next_q = 0;
+        let state_key = Self::encode_state(
+            history.get(0).to::<u32>(),
+            history.get(1).to::<u32>(),
+            history.get(2).to::<u32>(),
+            history.get(3).to::<u32>(),
+            history.get(4).to::<u32>(),
+        );
+
+        let q_table = self.q_table.get(sender);
+        let mut max_next_q = I32::try_from(0).unwrap();
         for i in 0..3 {
-            if q_values.get(i).as_i32() > max_next_q {
-                max_next_q = q_values.get(i).as_i32();
+            let val = q_table.get(state_key).get(i);
+            if val > max_next_q {
+                max_next_q = val;
             }
         }
 
         let action_idx: u32 = player_move.to();
 
-        let alpha = self.alpha.get().to::<i32>();
-        let gamma = self.gamma.get().to::<i32>();
+        let delta = reward.as_i32() * 100 + (gamma as i32 * max_next_q.as_i32()) / 100
+            - q_table.get(state_key).get(action_idx).as_i32();
 
-        let delta =
-            reward.as_i32() * 100 + (gamma * max_next_q) / 100 - q_values.get(action_idx).as_i32();
-
-        let set_value =
-            I32::try_from(q_values.get(action_idx).as_i32() + (alpha * delta) / 100).unwrap();
-
+        let qstate = I32::try_from(
+            q_table.get(state_key).get(action_idx).as_i32() + (alpha as i32 * delta as i32) / 100,
+        )
+        .unwrap();
         self.q_table
+            .setter(sender)
             .setter(state_key)
             .setter(action_idx)
-            .set(set_value);
+            .set(qstate);
 
-        let first = self.history.get(1);
-        let second = self.history.get(2);
-        let third = self.history.get(3);
-        let fourth = self.history.get(4);
+        let mut user_history = self.history.setter(sender);
+
+        let first = user_history.get(1);
+        let second = user_history.get(2);
+        let third = user_history.get(3);
+        let fourth = user_history.get(4);
         let fifth = player_move;
-        self.history.setter(0).set(first);
-        self.history.setter(1).set(second);
-        self.history.setter(2).set(third);
-        self.history.setter(3).set(fourth);
-        self.history.setter(4).set(fifth);
+
+        user_history.setter(0).set(first);
+        user_history.setter(1).set(second);
+        user_history.setter(2).set(third);
+        user_history.setter(3).set(fourth);
+        user_history.setter(4).set(player_move);
     }
 
-    pub fn get_history(&self) -> [U32; HISTORY_SIZE] {
+    pub fn get_history(&self, user: Address) -> [U32; HISTORY_SIZE] {
+        let history = self.history.get(user);
         [
-            self.history.get(0),
-            self.history.get(1),
-            self.history.get(2),
-            self.history.get(3),
-            self.history.get(4),
+            history.get(0),
+            history.get(1),
+            history.get(2),
+            history.get(3),
+            history.get(4),
         ]
     }
 
@@ -252,13 +235,13 @@ impl Contract {
     // }
     #[selector(name = "tokenURI")]
     pub fn token_uri(&self, _token_id: U256) -> String {
+        let owner = self.nft_owners.get(_token_id);
         let mut uri = String::new();
         let image_url = format!(
             // "https://api.dicebear.com/9.x/croodles/svg?seed={}{}",
             //"https://api.dicebear.com/9.x/croodles/png?seed={}{}",
-            "https://api.dicebear.com/9.x/croodles/svg?seed={}{}#svg",
-            self.owner.get(),
-            self.balance_of(self.owner.get())
+            "https://api.dicebear.com/9.x/croodles/svg?seed={:?}{}#svg",
+            owner, _token_id
         );
 
         let metadata = format!(
@@ -286,11 +269,8 @@ impl Contract {
         state
     }
 
-    pub fn get_q_value(&self, state: u32, action: u32) -> I32 {
-        if state >= Q_TABLE_SIZE as u32 || action >= 3 {
-            return I32::try_from(0).unwrap();
-        }
-        self.q_table.get(state).get(action)
+    pub fn get_q_value(&self, user: Address, state: u32, action: u32) -> I32 {
+        self.q_table.get(user).get(state).get(action)
     }
 }
 
@@ -379,10 +359,12 @@ contract activated and ready onchain with tx hash: 0x15c7f12af867410020d42d799e1
 
 // 0xdb2d15a3eb70c347e0d2c2c7861cafb946baab48
 
-// FINAL CONTRACT ADDRESS (WITHOUT PLAY):
+//  CONTRACT ADDRESS (WITHOUT PLAY):
 // 0xC0f973971051BDB6892ffFDa7AD211B4DCB9C0a7
-
 
 // USING PNG: 0x80e39270be5cf5c135579163a57793deeb2e5d08
 
 // USING SVG: 0xbf1cc808b59ea20301d5f47ffe9b67cef93680f9
+
+
+// CONTRACT ADDRESS (MULTIPlE NFT OWNERS): 0x37e4eaadd0e68a91ea02ff482bb91889e90ee331
