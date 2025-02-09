@@ -1,0 +1,11 @@
+type BattleResult @entity(immutable: true) {
+  id: Bytes!
+  token1: BigInt! # uint256
+  token2: BigInt! # uint256
+  winner: BigInt! # uint256
+  score1: Int! # uint8
+  score2: Int! # uint8
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}

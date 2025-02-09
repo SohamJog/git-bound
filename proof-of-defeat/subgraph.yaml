@@ -1,0 +1,26 @@
+specVersion: 1.0.0
+indexerHints:
+  prune: auto
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: Battle
+    network: arbitrum-sepolia
+    source:
+      address: "0xb66fbfaCE829Ae1A2269143707B3A2D41B2a5fC4"
+      abi: Battle
+      startBlock: 122156663
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - BattleResult
+      abis:
+        - name: Battle
+          file: ./abis/Battle.json
+      eventHandlers:
+        - event: BattleResult(uint256,uint256,uint256,uint8,uint8)
+          handler: handleBattleResult
+      file: ./src/battle.ts
