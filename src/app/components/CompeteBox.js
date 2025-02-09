@@ -1,12 +1,15 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { battle } from "@/lib/battle_utils";
+import { battle, ABI } from "@/lib/battle_utils";
 import { getBalance } from "@/lib/train_utils";
+import { ethers } from "ethers";
 
 const CompeteBox = ({ onClose, signer, userToken }) => {
   const [opponentToken, setOpponentToken] = useState("");
   const [battling, setBattling] = useState(false);
   const [result, setResult] = useState(null);
+
+  const contractInterface = new ethers.Interface(ABI);
 
   const handleBattle = async () => {
     if (!userToken || !opponentToken) return;
@@ -18,19 +21,23 @@ const CompeteBox = ({ onClose, signer, userToken }) => {
       const receipt = await battle(userToken, opponentToken, signer);
       console.log("Battle Receipt:", receipt);
 
-      // Extract winner from logs (simplified approach)
       const logs = receipt.logs;
       console.log("Logs:", logs);
-      const winner = logs.length > 0 ? logs[0].data : "Unknown";
 
-      setResult(`Winner: ${winner}`);
+      // Decode the event using ABI
+      const event = contractInterface.parseLog(logs[0]);
+
+      // Extract winner
+      const winnerToken = event.args.winner.toString();
+      setResult(`Winner Token ID: ${winnerToken}`);
     } catch (error) {
+      console.error("Battle Error:", error);
       setResult("Battle Failed!");
     } finally {
       setBattling(false);
     }
   };
-
+  
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
       <motion.div
@@ -94,3 +101,8 @@ const CompeteBox = ({ onClose, signer, userToken }) => {
 };
 
 export default CompeteBox;
+
+/*
+Winner: 0x00000000000000000000000000000000000000000000000000000000000000030000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000300000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000
+
+*/
