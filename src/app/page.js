@@ -10,6 +10,7 @@ import CompeteBox from "./components/CompeteBox";
 import FAQ from "./components/FAQ";
 import { getBalance } from "@/lib/train_utils";
 import MintPopup from "./components/MintPopup";
+import Head from "next/head";
 
 export default function Home() {
   const avatar = createAvatar(croodles, {
@@ -54,6 +55,9 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-bgDark text-white flex flex-col items-center">
+      <Head>
+        <title>My page title</title>
+      </Head>
       <NavBar setSigner={setSigner} setUserAddress={setUserAddress} />
       <div className="text-center mt-10">
         <h1 className="text-4xl font-pixel text-primary">
